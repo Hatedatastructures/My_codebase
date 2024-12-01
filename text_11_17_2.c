@@ -16,7 +16,7 @@ int game(int (*func)(int, int), int l)
     int f = func(l, c);
     printf("%d \n", c);
     printf("%d \n", f);
-    return func(f,c);
+    return func(f,l);
 }
 
 // 修改后的text函数，接收一个函数指针func（指向接收两个int参数并返回int的函数）和两个整数参数
