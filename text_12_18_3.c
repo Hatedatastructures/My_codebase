@@ -40,6 +40,7 @@ DWORD WINAPI my_diaomao()
 /*子线程2*/
 {
     printf("子线程2线程开始.\n");
+    Sleep(10);
     FILE* fp = fopen("C:\\Users\\C1373\\Desktop\\text.txt", "w");
     if (fp == NULL)
     {
@@ -56,6 +57,7 @@ DWORD WINAPI my_diaomao()
 }
 int main()
 {
+    SetConsoleOutputCP(CP_UTF8);
     printf("主线程开始.\n");
     HANDLE haiwei;
     HANDLE haiwei1;
@@ -77,7 +79,8 @@ int main()
             my_diaomao,     /*线程函数      */
             NULL,           /*线程函数参数  */
             0,              /*默认创建标志  */
-            &dwThreadId);   /*线程名字      */
+            &dwExitCode);   /*线程名字      */
+    printf("%d %d\n",dwThreadId,dwExitCode);
     if(haiwei == NULL && haiwei1 == NULL)
     {
         /*创建失败*/
@@ -96,6 +99,11 @@ int main()
     CloseHandle(haiwei);
     CloseHandle(haiwei1);
     printf("主线程结束.\n");
+    printf("file:%s\n",__FILE__);/*文件路径*/
+    printf("line:%d\n",__LINE__);/*当前行号*/
+    printf("time:%s\n",__TIME__);/*编译日期*/
+    printf("date:%s\n",__DATE__);/*编译时间*/
+    system("pause");
     return 0;
 }
 /*
