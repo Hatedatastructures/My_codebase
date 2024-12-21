@@ -6,11 +6,18 @@
 #include <unistd.h>
 int main()
 {
+    SetConsoleOutputCP(CP_UTF8);
+    char arr[100];
+    char str[100];
+    printf("请输入要修改的源文件名,文件必须存在！\n"); 
+    //输入文件名
+    printf("请输入源文件名：->");
+    scanf("%s", str);
     /*读取文件*/
-    FILE*pr=fopen("W:\\text.bmp","rb");
+    FILE*pr=fopen(str,"rb");
     if(pr==NULL)
     {
-        printf("打开文件失败\n");
+        printf("打开文件失败,或找不到该文件\n");
         printf("%s\n",strerror(errno));
         return 1;
     }
@@ -27,27 +34,33 @@ int main()
     long fileSize = ftell(pr);
     printf("file size: %ld bytes\n", fileSize);
     /*输出*/
+    printf("请输入目的文件地址->\n");
+    scanf("%s", arr);
     /*写入文件*/
-    FILE*pw=fopen("W:\\text1.txt","wb");
+    FILE*pw=fopen(arr,"wb");
     if(pw==NULL)
     {
         printf("打开文件失败\n");
         printf("%s\n",strerror(errno));
         return 1;
     }
-   for (int i = 0; i < width; i++)
+    char buffer[1048579];  // 可以根据实际情况调整缓冲区大小
+    rewind(pr);  // 将文件指针重新定位到文件开头，方便后续读取
+    while (!feof(pr)) 
     {
-    for (int j = 0; j < height; j++)
-    {
-        unsigned char pixel[3];
-        fseek(pr, fileHeader.bfOffBits + (j * width + i) * 3, SEEK_SET);
-        fread(pixel, 3, 1, pr);
-        fprintf(pw, "%d %d %d\n", pixel[0], pixel[1], pixel[2]);
+        size_t bytesRead = fread(buffer, 1, sizeof(buffer), pr);
+        if (bytesRead > 0) 
+        {
+            fwrite(buffer, 1, bytesRead, pw);
+        }
     }
-    }
+    /*关闭文件*/
     fclose(pw);
     pw=NULL;
     fclose(pr);
     pr=NULL;
+    printf("拷贝成功！\n");
+    printf("请按任意键退出程序\n");
+    system("pause");
     return 0;
 }
