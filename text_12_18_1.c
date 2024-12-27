@@ -281,18 +281,21 @@ const char *s =                                                                 
 
 
 #pragma pack(1)
-typedef struct {
+typedef struct 
+{
     unsigned char B, G, R;
 } Pixel, ColorBGR;
 
 
-typedef struct {
+typedef struct 
+{
     int width, height;
     Pixel* pixels;
 } BitmapImage;
 
 
-typedef struct {
+typedef struct 
+{
     int time;
     char lyric[100];
     char translation[100];
@@ -317,7 +320,8 @@ const char* encode_table = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
 const char* decode_table = "                                           \x3e   \x3f\x34\x35\x36\x37\x38\x39\x3a\x3b\x3c\x3d       \x0\x1\x2\x3\x4\x5\x6\x7\x8\x9\xa\xb\xc\xd\xe\xf\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19      \x1a\x1b\x1c\x1d\x1e\x1f\x20\x21\x22\x23\x24\x25\x26\x27\x28\x29\x2a\x2b\x2c\x2d\x2e\x2f\x30\x31\x32\x33     ";
 
 // base64字符串解码
-BYTE* base64_decode(const char* source_str, int source_str_length, int* decoded_data_size) {
+BYTE* base64_decode(const char* source_str, int source_str_length, int* decoded_data_size) 
+{
     
     // 计算解码后数据的大小
     *decoded_data_size = source_str_length * 3 / 4;
@@ -328,7 +332,8 @@ BYTE* base64_decode(const char* source_str, int source_str_length, int* decoded_
 
     // 首先，4个字符一组，进行解码
     int n = (source_str_length + 3) / 4 - 1;
-    for (int i = 0; i < n; ++i) {
+    for (int i = 0; i < n; ++i) 
+    {
         char d1 = decode_table[source_str[0]], d2 = decode_table[source_str[1]],
              d3 = decode_table[source_str[2]], d4 = decode_table[source_str[3]];
         decoded_ptr[0] = (d1 << 2) | (d2 >> 4);
@@ -340,7 +345,8 @@ BYTE* base64_decode(const char* source_str, int source_str_length, int* decoded_
 
     // 对剩下的字符进行解码
     n = source_str_length - 4 * n - 1;
-    while (n > 0) {
+    while (n > 0) 
+    {
         if (source_str[1] == encode_table[64]) break;
         *decoded_ptr = decode_table[source_str[0]] << (8 - n * 2) | decode_table[source_str[1]] >> (n * 2 - 2);
         decoded_ptr++;
@@ -358,7 +364,8 @@ BYTE* base64_decode(const char* source_str, int source_str_length, int* decoded_
 
 
 // 解码出4个文件的数据，并且写入文件
-void decodeDatas() {
+void decodeDatas() 
+{
     const char* files[] = { MID_FILE_PATH, LYRIC_FILE_PATH, PIC1_PATH, PIC2_PATH };
 
     // 每个文件的base64字符串的的长度
@@ -366,7 +373,8 @@ void decodeDatas() {
 
     const char* base64_ptr = s;
 
-    for (int i = 0; i < 4; base64_ptr += lengths[i], i++) {
+    for (int i = 0; i < 4; base64_ptr += lengths[i], i++) 
+    {
         // 判断文件存在，就跳过这个文件
         if (_access(files[i], 0) == 0)
             continue;
@@ -374,7 +382,8 @@ void decodeDatas() {
         FILE* fp;
         fopen_s(&fp, files[i], "wb");
 
-        if (fp) {
+        if (fp) 
+        {
             int dataSize;
             BYTE* data = base64_decode(base64_ptr, lengths[i], &dataSize);
             
@@ -390,7 +399,8 @@ void decodeDatas() {
 
 
 // 开启Windows的虚拟终端序列支持
-BOOLEAN enableVTMode() {
+BOOLEAN enableVTMode() 
+{
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
     if (hOut == INVALID_HANDLE_VALUE)
         return FALSE;
@@ -410,7 +420,8 @@ BOOLEAN enableVTMode() {
 
 
 // 设置控制台的光标到 (x, y)
-void setCursorPos(int x, int y) {
+void setCursorPos(int x, int y) 
+{
     COORD coord;
     coord.X = x;
     coord.Y = y;
@@ -421,7 +432,8 @@ void setCursorPos(int x, int y) {
 
 
 // 读取Bitmap图片
-BOOLEAN readBitmap(const char* filePath, BitmapImage* image) {
+BOOLEAN readBitmap(const char* filePath, BitmapImage* image) 
+{
     FILE* fp = fopen(filePath, "rb");
     if (!fp)
         return FALSE;
@@ -456,7 +468,8 @@ BOOLEAN readBitmap(const char* filePath, BitmapImage* image) {
 
 
 // 在(posX, posY)处打印图片
-void displayImage(BitmapImage image, int posX, int posY) {
+void displayImage(BitmapImage image, int posX, int posY) 
+{
     int bufferIndex = 0;
     int x, y;
     int displayWidth = MIN(FRAME_WIDTH - posX, image.width);
@@ -464,13 +477,15 @@ void displayImage(BitmapImage image, int posX, int posY) {
 
     bufferIndex += sprintf_s(strBuffer + bufferIndex, sizeof(strBuffer), "\033[0m");
 
-    for (y = 0; y < displayHeight; y++) {
+    for (y = 0; y < displayHeight; y++) 
+    {
 
         // 打印posX个空格，用来占位
         for (x = 0; x < posX; x++)
             strBuffer[bufferIndex++] = ' ';
 
-        for (x = 0; x < displayWidth; x++) {
+        for (x = 0; x < displayWidth; x++) 
+        {
             Pixel pixel = image.pixels[x + y * image.width];
 
             // 在像素值为纯黑的地方打印空格(相当于透明)
@@ -494,7 +509,8 @@ void displayImage(BitmapImage image, int posX, int posY) {
 
 
 // 调用Windows的API播放mid音频 (ps: 这个API用来播放mp3音乐也是可以的~)
-BOOLEAN playMusic(const char* filePath) {
+BOOLEAN playMusic(const char* filePath) 
+{
     HMODULE module = LoadLibraryA("winmm.dll");
 
     typedef MCIERROR(WINAPI* MciSendStringT)(LPCSTR lpstrCommand, LPSTR lpstrReturnString, UINT uReturnLength, HWND hwndCallback);
@@ -524,7 +540,8 @@ BOOLEAN playMusic(const char* filePath) {
 
 
 // 读取歌词文件数据
-BOOLEAN readLyricFile(const char* filePath, LyricLine** lyrics, int* lineNums) {
+BOOLEAN readLyricFile(const char* filePath, LyricLine** lyrics, int* lineNums) 
+{
     FILE* fp;
     fopen_s(&fp, filePath, "r");
 
@@ -537,13 +554,16 @@ BOOLEAN readLyricFile(const char* filePath, LyricLine** lyrics, int* lineNums) {
 
     LyricLine* _lyrics = (LyricLine*)malloc(sizeof(LyricLine) * size);
 
-    while (fgets(line, 200, fp)) {
+    while (fgets(line, 200, fp)) 
+    {
 
         // 每行歌词的格式为 [分钟:秒.毫秒] 歌词内容 (歌词翻译)
-        if (sscanf_s(line, "[%02d:%02d.%03d]%[^(] (%[^)])", &minutes, &seconds, &milliseconds, lyric, 100, translation, 100) == 5) {
+        if (sscanf_s(line, "[%02d:%02d.%03d]%[^(] (%[^)])", &minutes, &seconds, &milliseconds, lyric, 100, translation, 100) == 5) 
+        {
             
             // 歌词数组的初始大小为10，如果超出大小，需要重新分配更大的内存
-            if (i == size) {
+            if (i == size) 
+            {
                 size += 10;
                 _lyrics = (LyricLine*)realloc(_lyrics, sizeof(LyricLine) * size);
             }
@@ -579,7 +599,8 @@ void surprise() {
         order[i] = i;
 
     // 然后，随机交换其中元素的位置，完成随机打乱 (Knuth-Shuffle算法)
-    for (i = len - 1; i > 0; --i) {
+    for (i = len - 1; i > 0; --i) 
+    {
         j = rand() % (i + 1);
         tmp = order[i];
         order[i] = order[j];
@@ -587,7 +608,8 @@ void surprise() {
     }
 
     // 按照随机的像素点顺序打印出彩蛋
-    for (i = 0; i < len; i++) {
+    for (i = 0; i < len; i++) 
+    {
         int pos = order[i];
         int x = pos % pic2.width;
         int y = pos / pic2.width;
@@ -607,13 +629,16 @@ void surprise() {
 
 
 // 播放歌词
-void playLyrics(LyricLine* lyrics, int lineNums) {
+void playLyrics(LyricLine* lyrics, int lineNums) 
+{
     clock_t startTime = clock() + DELAY;
 
-    for (int i = 0; i < lineNums; ++i) {
+    for (int i = 0; i < lineNums; ++i) 
+    {
         
         // 等待到第i行歌词的播放时间
-        while (clock() < lyrics[i].time + startTime) {
+        while (clock() < lyrics[i].time + startTime) 
+        {
             Sleep(100);
         }
 
@@ -627,25 +652,29 @@ void playLyrics(LyricLine* lyrics, int lineNums) {
         color.R = 131;
 
         // i < 8 时，从上到下打印出0到i行的所有歌词
-        if (i < 8) {
+        if (i < 8) 
+        {
             j = 0;
             end = i;
         }
 
         // 8 <= i < 11 时，让第i行歌词慢慢回升到中间位置
-        else if (i < 11) {
+        else if (i < 11) 
+        {
             j = i + i - 14;
             end = i + i - 7;
         }
 
         // 彩蛋
-        else if (i == 22) {
+        else if (i == 22) 
+        {
             surprise();
             continue;
         }
 
         // i > 22时，只打印第i行歌词，并且调整颜色
-        else if (i > 22) {
+        else if (i > 22) 
+        {
             j = i;
             end = i;
             color.B = 155;
@@ -656,7 +685,8 @@ void playLyrics(LyricLine* lyrics, int lineNums) {
 
         // 将要打印的所有歌词写入缓冲区，然后用puts一次全部打印出来
         int bufferIndex = 0;
-        for (; j <= end; j++) {
+        for (; j <= end; j++) 
+        {
             // 高亮第i行的歌词
             if (j == i)
                 bufferIndex += sprintf_s(strBuffer + bufferIndex, sizeof(strBuffer) - bufferIndex, "\033[1m\033[38;2;%d;%d;%dm%-50s\n%-50s\n\n\033[0m", color.R, color.G, color.B, lyrics[j].lyric, lyrics[j].translation);
@@ -675,7 +705,8 @@ void playLyrics(LyricLine* lyrics, int lineNums) {
 
 
 
-int main() {
+int main() 
+{
 
     // 设置控制台编码方式为utf-8
     system("chcp 65001");

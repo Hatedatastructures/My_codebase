@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <windows.h>
 #include <unistd.h>
+/*文件拷贝*/
 int main()
 {
     SetConsoleOutputCP(CP_UTF8);
@@ -19,7 +20,7 @@ int main()
     {
         printf("打开文件失败,或找不到该文件\n");
         printf("%s\n",strerror(errno));
-        return 1;
+        return 1;  
     }
     BITMAPFILEHEADER fileHeader;
     BITMAPINFOHEADER infoHeader;
@@ -44,8 +45,10 @@ int main()
         printf("%s\n",strerror(errno));
         return 1;
     }
-    char buffer[1048579];  // 可以根据实际情况调整缓冲区大小
-    rewind(pr);  // 将文件指针重新定位到文件开头，方便后续读取
+    char buffer[1048579];  
+    /*可以根据实际情况调整缓冲区大小*/
+    rewind(pr);  
+    /*将文件指针重新定位到文件开头，方便后续读取*/
     while (!feof(pr)) 
     {
         size_t bytesRead = fread(buffer, 1, sizeof(buffer), pr);
