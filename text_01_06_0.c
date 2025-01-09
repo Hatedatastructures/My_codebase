@@ -8,7 +8,7 @@
 #define ADDRESS_MAX 100                                 /*地址*/
 #define SEX_MAX 10                                      /*性别*/
 #define Capacity_increase_multiple 2                    /*倍数*/
-enum menu
+enum medu
 {
     EXITS,
     ONE,
@@ -26,7 +26,11 @@ enum menu
     THIRTEEN,
     FOURTEEN,
     FIFTEEN,
-};                                              
+};   
+
+// 定义函数指针类型
+typedef int (*cmp_func_t)(const void*, const void*);
+
 
 typedef struct student
 {
@@ -57,6 +61,8 @@ typedef struct studentss
     size_t size;                                        /*当前元素个数*/
     size_t capacity;                                    /*当前容量*/
 } st;
+
+
 
 void initialize(st* s);                                 /*初始*/
 
@@ -138,35 +144,72 @@ int cmp_chemistry(const void* a, const void* b)
     return ((stu*)a)->wing.chemistry - ((stu*)b)->wing.chemistry;
 }
 
+static cmp_func_t cmp_funcs[] = 
+{
+    NULL,           
+    cmp_num,        
+    cmp_name,      
+    cmp_age,        
+    cmp_sex,        
+    cmp_tel,        
+    cmp_address,    
+    cmp_identity_card, 
+    cmp_Chinese,    
+    cmp_Math,       
+    cmp_English,    
+    cmp_politics,   
+    cmp_history,    
+    cmp_geography,  
+    cmp_biology,    
+    cmp_chemistry   
+};                                                      //函数指针数组
 
 void initialize(st* s)                                  /*初始化*/
 {
-    assert(s!= NULL);
-    s->arr = (stu*)malloc(sizeof(stu) * 10);
+    assert(s != NULL);
+    const size_t INITIAL_CAPACITY = 10;
+    
+    s->arr = (stu*)malloc(sizeof(stu) * INITIAL_CAPACITY);
     if (s->arr == NULL)
     {
-        printf("申请内存失败！\n");
-        exit(-1);
+        fprintf(stderr, "内存分配失败: 无法分配 %zu 字节\n", sizeof(stu) * INITIAL_CAPACITY);
+        exit(EXIT_FAILURE);
     }
+    
     s->size = 0;
-    s->capacity = 10;
+    s->capacity = INITIAL_CAPACITY;
+    memset(s->arr, 0, sizeof(stu) * INITIAL_CAPACITY);  // 初始化内存
 }
 
 
 void Capacity(st* p)                                    /*增容*/
 {
-    assert(p!= NULL);
-    if (p->size == p->capacity)
-    {
-        p->capacity *= Capacity_increase_multiple;
-        stu* tmp = (stu*)realloc(p->arr, sizeof(stu) * p->capacity);
-        if (tmp == NULL)
-        {
-            printf("增容申请内存失败！\n");
-            exit(-1);
-        }
-        p->arr = tmp;
+    assert(p != NULL);
+    
+    if (p->size < p->capacity) {
+        return;
     }
+
+    size_t new_capacity = p->capacity * Capacity_increase_multiple;
+    if (new_capacity <= p->capacity) 
+    {  // 检查溢出
+        fprintf(stderr, "容量溢出: 当前容量 %zu, 新容量 %zu\n",p->capacity, new_capacity);
+        exit(EXIT_FAILURE);
+    }
+
+    stu* new_arr = (stu*)realloc(p->arr, sizeof(stu) * new_capacity);
+    if (new_arr == NULL)
+    {
+        fprintf(stderr, "内存重分配失败: 无法分配 %zu 字节\n",
+                sizeof(stu) * new_capacity);
+        exit(EXIT_FAILURE);
+    }
+
+    p->arr = new_arr;
+    p->capacity = new_capacity;
+    
+    // 初始化新分配的内存
+    memset(p->arr + p->size, 0, sizeof(stu) * (new_capacity - p->size));
 }
 
 
@@ -212,6 +255,11 @@ void stuHeader_removal(st* p)                            /*头删*/
 void stuInsert_in_the_middle(st* p, stu* x, int pos)     /*中插*/
 {
     assert(p!= NULL);
+    if (pos < 0 || pos > p->size) {
+        printf("插入位置无效!\n");
+        free(x);
+        return;
+    }
     Capacity(p);
     for (int i = p->size; i > pos; i--)
     {
@@ -226,6 +274,10 @@ void stuInsert_in_the_middle(st* p, stu* x, int pos)     /*中插*/
 void stuIntermediate_deletion(st* p, int pos)           /*中删*/
 {
     assert(p!= NULL);
+    if (pos < 0 || pos >= p->size) {
+        printf("删除位置无效!\n");
+        return;
+    }
     Delete(p, pos);
 }
 
@@ -266,25 +318,55 @@ void stuprint(const st* p)                              /*打印*/
 
 void Read_file(FILE* fp, st* p)                         /*读取*/
 {
-    assert(p!= NULL);
+    assert(p != NULL);
+    assert(fp != NULL);
+    
     initialize(p);
+    
     stu stg;
-    while (fscanf(fp, "%d %s %d %s %lld %s %lld %d %d %d %d %d %d %d %d",
-        &stg.num,&stg.name,&stg.age,&stg.sex,&stg.tel,&stg.address,&stg.identity_card,
-        &stg.wing.Chinese,&stg.wing.Math,&stg.wing.English,&stg.wing.politics,
-        &stg.wing.history,&stg.wing.geography,&stg.wing.biology,&stg.wing.chemistry) == 15)
+    int line_num = 1;
+    char line[256];
+    
+    while (fgets(line, sizeof(line), fp)) 
     {
+        // 跳过空行和注释行
+        if (line[0] == '\n' || line[0] == '#') 
+        {
+            line_num++;
+            continue;
+        }
+
+        int result = sscanf(line, "%d %19s %d %9s %lld %99s %lld %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu",
+            &stg.num, stg.name, &stg.age, stg.sex, &stg.tel, stg.address, &stg.identity_card,
+            &stg.wing.Chinese, &stg.wing.Math, &stg.wing.English, &stg.wing.politics,
+            &stg.wing.history, &stg.wing.geography, &stg.wing.biology, &stg.wing.chemistry);
+
+        if (result != 15) 
+        {
+            fprintf(stderr, "文件格式错误: 第 %d 行\n", line_num);
+            continue;
+        }
+
+        // 验证数据
+        if (stg.age < 0 || stg.age > 150) 
+        {
+            fprintf(stderr, "年龄无效: 第 %d 行\n", line_num);
+            continue;
+        }
+
         p->arr[p->size] = stg;
         p->size++;
         Capacity(p);
+        line_num++;
     }
-    // 检查文件读取是否成功
-    if (ferror(fp))
+
+    if (ferror(fp)) 
     {
-        printf("文件读取错误！\n");
-        exit(-1);
+        fprintf(stderr, "文件读取错误: %s\n", strerror(errno));
+        exit(EXIT_FAILURE);
     }
-    printf("\n读取成功!\n");
+
+    printf("成功读取 %zu 条记录\n", p->size);
 }
 void Write_file(FILE* fp, st* p)                       /*写入*/
 {
@@ -310,49 +392,91 @@ void Write_file(FILE* fp, st* p)                       /*写入*/
         printf("当前写入人数:%zu\n", p->size);
     }
 }
-stu* stuinport()                                        /*输入*/
-{ 
-    stu* stg= (stu*)malloc(sizeof(stu));
-    if(stg == NULL)
+int safe_input(const char* prompt, const char* format, void* value) 
+{
+    while (1) {
+        printf("%s", prompt);
+        if (scanf(format, value) == 1) 
+        {
+            while (getchar() != '\n');
+            return 1;
+        }
+        printf("输入无效，请重新输入!\n");
+
+        while (getchar() != '\n');
+    }
+}
+
+int validate_string(const char* str, size_t max_len) 
+{
+    return str && strlen(str) > 0 && strlen(str) < max_len;
+}
+
+stu* stuinport() 
+{
+    stu* stg = (stu*)malloc(sizeof(stu));
+    if (!stg) 
     {
         perror("malloc");
-        exit(-1);
+        printf("内存申请失败!\n");
+        system("pause");
+        return NULL;
     }
+    memset(stg, 0, sizeof(stu));
     printf("请输入学生信息:\n\a");
-    printf("学号:");
-    scanf("%d", &stg->num);
-    printf("姓名:");
-    scanf("%s", stg->name);
-    printf("年龄:");
-    scanf("%d", &stg->age);
-    printf("性别:");
-    scanf("%s", stg->sex);
-    printf("电话:");
-    scanf("%lld", &stg->tel);
-    printf("地址:");
-    scanf("%s", stg->address);
-    printf("证号:");
-    scanf("%lld", &stg->identity_card);
-    printf("语文:");
-    scanf("%d", &stg->wing.Chinese);
-    printf("数学:");
-    scanf("%d", &stg->wing.Math);
-    printf("英语:");
-    scanf("%d", &stg->wing.English);
-    printf("政治:");
-    scanf("%d", &stg->wing.politics);
-    printf("历史:");
-    scanf("%d", &stg->wing.history);
-    printf("地理:");
-    scanf("%d", &stg->wing.geography);
-    printf("生物:");
-    scanf("%d", &stg->wing.biology);
-    printf("化学:");
-    scanf("%d", &stg->wing.chemistry);
+    struct {
+        const char* prompt;
+        const char* format;
+        void* value;
+        int (*validator)(void*);
+        } fields[] = 
+                {
+                    {"学号:", "%d", &stg->num, NULL},
+                    {"姓名:", "%19s", stg->name, (int(*)(void*))validate_string},
+                    {"年龄:", "%d", &stg->age, NULL},
+                    {"性别:", "%9s", stg->sex, (int(*)(void*))validate_string},
+                    {"电话:", "%lld", &stg->tel, NULL},
+                    {"地址:", "%99s", stg->address, (int(*)(void*))validate_string},
+                    {"证号:", "%lld", &stg->identity_card, NULL},
+                    {"语文:", "%hhu", &stg->wing.Chinese, NULL},
+                    {"数学:", "%hhu", &stg->wing.Math, NULL},
+                    {"英语:", "%hhu", &stg->wing.English, NULL},
+                    {"政治:", "%hhu", &stg->wing.politics, NULL},
+                    {"历史:", "%hhu", &stg->wing.history, NULL},
+                    {"地理:", "%hhu", &stg->wing.geography, NULL},
+                    {"生物:", "%hhu", &stg->wing.biology, NULL},
+                    {"化学:", "%hhu", &stg->wing.chemistry, NULL}
+                };
+    for (size_t i = 0; i < sizeof(fields)/sizeof(fields[0]); i++) 
+    {
+        while (1) 
+        {
+            if (!safe_input(fields[i].prompt, fields[i].format, fields[i].value)) 
+            {
+                continue;
+            }
+            if (strcmp(fields[i].prompt, "年龄:") == 0) 
+            {
+                if (stg->age < 0 || stg->age > 150) 
+                {
+                    printf("年龄必须在0到150之间!\n");
+                    continue;
+                }
+            }
+            if (fields[i].validator && !fields[i].validator(fields[i].value)) 
+            {
+                printf("输入无效，请重新输入!\n");
+                continue;
+            }
+            
+            break;
+        }
+    }
+    
     printf("输入成功!\n");
     return stg;
 }
-int sorts()
+size_t sorts()
 {
     printf("请选择排序方式:\n\a");
     printf("1  按学号排序\n");
@@ -370,12 +494,15 @@ int sorts()
     printf("13.按地理排序\n");
     printf("14.按生物排序\n");
     printf("15.按化学排序\n");
-    int inport = 0;
-    scanf("%d", &inport);
+    size_t inport = 0;
+    scanf("%zu", &inport);
     return inport;
 }
 
-void my_sort(st* p, int index)                          /*排序*/
+
+
+
+void my_sort(st* p, size_t index)                          /*排序*/
 {
     assert(p!= NULL);
     if(p->size == 0)
@@ -383,71 +510,35 @@ void my_sort(st* p, int index)                          /*排序*/
         printf("当前没有学生信息,请先输入学生信息!\n");
         exit(-1);
     }
-    switch (index)
+    
+    // 检查索引是否有效
+    if (index >= 1 && index <= 15 && cmp_funcs[index] != NULL) 
     {
-        case ONE:
-            qsort(p->arr, p->size, sizeof(stu), cmp_num);
-            break;
-        case TWO:
-            qsort(p->arr, p->size, sizeof(stu), cmp_name);
-            break;
-        case THREE:
-            qsort(p->arr, p->size, sizeof(stu), cmp_age);
-            break;
-        case FOUR:
-            qsort(p->arr, p->size, sizeof(stu), cmp_sex);
-            break;
-        case FIVE:
-            qsort(p->arr, p->size, sizeof(stu), cmp_tel);
-            break;
-        case SIX:
-            qsort(p->arr, p->size, sizeof(stu), cmp_address);
-            break;
-        case SEVEN:
-            qsort(p->arr, p->size, sizeof(stu), cmp_identity_card);
-            break;
-        case EIGHT:
-            qsort(p->arr, p->size, sizeof(stu), cmp_Chinese);
-            break;
-        case NINE:
-            qsort(p->arr, p->size, sizeof(stu), cmp_Math);
-            break;
-        case TEN:
-            qsort(p->arr, p->size, sizeof(stu), cmp_English);
-            break;
-        case ELEVEN:
-            qsort(p->arr, p->size, sizeof(stu), cmp_politics);
-            break;
-        case TWELVE:
-            qsort(p->arr, p->size, sizeof(stu), cmp_history);
-            break;
-        case THIRTEEN:
-            qsort(p->arr, p->size, sizeof(stu), cmp_geography);
-            break;
-        case FOURTEEN:
-            qsort(p->arr, p->size, sizeof(stu), cmp_biology);
-            break;
-        case FIFTEEN:
-            qsort(p->arr, p->size, sizeof(stu), cmp_chemistry);
-            break;
-        default:
-            printf("输入错误!\n");
-            break;
+        qsort(p->arr, p->size, sizeof(stu), cmp_funcs[index]);
+        printf("排序成功!\n");
+    } 
+    else 
+    {
+        printf("输入错误，返回!\n");
     }
-    printf("排序成功!\n\a");
 }
-void meau()
+
+
+void display_menu() 
 {
-    printf("0:退出\n");
-    printf("1:头删\n");
-    printf("2:中插\n");
-    printf("3:中删\n");
-    printf("4:尾插\n");
-    printf("5:尾删\n");
-    printf("6:打印\n");
-    printf("7:读取文件\n");
-    printf("8:写入文件\n");
-    printf("9:排序\n\a");
+    printf("========== 学生管理系统 ==========\n");
+    printf("1. 删除头部学生\n");
+    printf("2. 插入学生到指定位置\n");
+    printf("3. 删除指定位置学生\n");
+    printf("4. 添加学生到末尾\n");
+    printf("5. 删除末尾学生\n");
+    printf("6. 显示所有学生信息\n");
+    printf("7. 从文件加载数据\n");
+    printf("8. 保存数据到文件\n");
+    printf("9. 排序学生信息\n");
+    printf("0. 退出系统\n");
+    printf("==================================\n");
+    printf("请选择操作 (0-9): ");
 }
 int main()
 {
@@ -455,22 +546,22 @@ int main()
     st p;
     initialize(&p);
     int pos = 0;
-    FILE* fp = fopen("students_data.txt", "r");
+    FILE* fp = fopen("C:\\Users\\C1373\\Desktop\\students_data.txt", "r");
     if (fp == NULL)
     {
-        perror("fopen");
-        return 0;
+        printf("文件不存在,请创建文件!\n");
+        system("pause");
     }
     if(setvbuf(fp, NULL, _IOFBF, 8192)!= 0) 
     { 
         perror("setvbuf");
-        return -1;
+        printf("缓存申请失败!\n");
+        system("pause");
     }
     int inport = 0;
-    meau();
+    display_menu();
     while (scanf("%d", &inport) != EOF)
     {
-        meau();
         switch (inport)
         {
             case EXITS:
@@ -500,15 +591,20 @@ int main()
                 Read_file(fp,&p);
                 break;
             case EIGHT:
-                fclose(fp);
-                fp = NULL;
-                FILE* fp = fopen("students_data.txt", "w");
-                if (fp == NULL)
                 {
-                    perror("fopen");
-                    return -1;
+                    fclose(fp);
+                    fp = fopen("students_data.txt", "w");
+                    if (fp == NULL)
+                    {
+                        perror("fopen");
+                        printf("无法打开文件进行写入!\n");
+                        system("pause");
+                        break;
+                    }
+                    Write_file(fp, &p);
+                    fclose(fp);
+                    fp = NULL;
                 }
-                Write_file(fp, &p);
                 break;
             case NINE:
                 my_sort(&p, sorts());
@@ -516,6 +612,7 @@ int main()
             default:
                 printf("输入错误，请重新输入!\n\a");
         }
+        display_menu();
     }
     fclose(fp);
     fp = NULL;
