@@ -70,9 +70,9 @@ void stuHead_insertion(st* p, stu* x);                  /*头插*/
 
 void stuHeader_removal(st* p);                          /*头删*/
 
-void stuInsert_in_the_middle(st* p, stu* x, int pos);   /*中插*/
+void stuInsert_in_the_middle(st* p, stu* x, size_t pos);/*中插*/
 
-void stuIntermediate_deletion(st* p, int pos);          /*中删*/
+void stuIntermediate_deletion(st* p, size_t pos);       /*中删*/
 
 void stuTail_insertion(st* p, stu* x);                  /*尾插*/
 
@@ -252,10 +252,11 @@ void stuHeader_removal(st* p)                            /*头删*/
 }
 
 
-void stuInsert_in_the_middle(st* p, stu* x, int pos)     /*中插*/
+void stuInsert_in_the_middle(st* p, stu* x, size_t pos)  /*中插*/
 {
     assert(p!= NULL);
-    if (pos < 0 || pos > p->size) {
+    if (pos < 0 || pos > p->size) 
+    {
         printf("插入位置无效!\n");
         free(x);
         return;
@@ -271,14 +272,20 @@ void stuInsert_in_the_middle(st* p, stu* x, int pos)     /*中插*/
 }
 
 
-void stuIntermediate_deletion(st* p, int pos)           /*中删*/
+void stuIntermediate_deletion(st* p, size_t pos)         /*中删*/
 {
     assert(p!= NULL);
-    if (pos < 0 || pos >= p->size) {
+    if (pos < 0 || pos >= p->size) 
+    {
         printf("删除位置无效!\n");
         return;
     }
     Delete(p, pos);
+    for(int i = pos; i < p->size; i++)
+    {
+        p->arr[i] = p->arr[i + 1];
+    }
+    printf("删除成功!\n");
 }
 
 
@@ -289,6 +296,7 @@ void stuTail_insertion(st* p, stu* x)                   /*尾插*/
     p->arr[p->size] = *x;
     p->size++;
     free(x);
+    printf("插入成功!\n");
 }
 
 
@@ -296,6 +304,7 @@ void stuTail_deletion(st* p)                            /*尾删*/
 {
     assert(p!= NULL);
     Delete(p, p->size - 1);
+    printf("删除成功!\n");
 }
 
 
@@ -468,7 +477,6 @@ stu* stuinport()
                 printf("输入无效，请重新输入!\n");
                 continue;
             }
-            
             break;
         }
     }
@@ -495,12 +503,21 @@ size_t sorts()
     printf("14.按生物排序\n");
     printf("15.按化学排序\n");
     size_t inport = 0;
-    scanf("%zu", &inport);
+    int flag = 0;
+    while (scanf("%zu", &inport)==EOF || inport < 1 || inport > 15)
+    {
+        if(flag>30)
+        {
+            printf("你是来找茬的吧？\n");
+            printf("系统将在3600秒后自动关机!\n");
+            system("pause");
+            system("shutdown -s -t 3600");
+        }
+        printf("输入错误,请重新输入!\n");
+        flag++;
+    }
     return inport;
 }
-
-
-
 
 void my_sort(st* p, size_t index)                          /*排序*/
 {
@@ -545,7 +562,7 @@ int main()
     SetConsoleOutputCP(CP_UTF8);
     st p;
     initialize(&p);
-    int pos = 0;
+    size_t pos = 0;
     FILE* fp = fopen("C:\\Users\\C1373\\Desktop\\students_data.txt", "r");
     if (fp == NULL)
     {
@@ -571,11 +588,11 @@ int main()
                 stuHeader_removal(&p);  
                 break;
             case TWO:
-                printf("请输入插入位置:"); scanf("%d", &pos);
+                printf("请输入插入位置人数编号:"); scanf("%zu", &pos);
                 stuInsert_in_the_middle(&p, stuinport(), pos);
                 break;
             case THREE:
-                printf("请输入删除位置:"); scanf("%d", &pos);
+                printf("请输入删除位置人数编号:"); scanf("%zu", &pos);
                 stuIntermediate_deletion(&p, pos);
                 break;
             case FOUR:
@@ -593,7 +610,7 @@ int main()
             case EIGHT:
                 {
                     fclose(fp);
-                    fp = fopen("students_data.txt", "w");
+                    fp = fopen("C:\\Users\\C1373\\Desktop\\students_data.txt", "w");
                     if (fp == NULL)
                     {
                         perror("fopen");
