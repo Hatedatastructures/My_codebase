@@ -8,6 +8,8 @@
 #define ADDRESS_MAX 100                                 /*地址*/
 #define SEX_MAX 10                                      /*性别*/
 #define Capacity_increase_multiple 2                    /*倍数*/
+#define Write_address "C:\\Users\\C1373\\Desktop\\students_data.txt"
+#define Read_address  "C:\\Users\\C1373\\Desktop\\students_data.txt"
 enum medu
 {
     EXITS,
@@ -30,7 +32,6 @@ enum medu
 
 // 定义函数指针类型
 typedef int (*cmp_func_t)(const void*, const void*);
-
 
 typedef struct student
 {
@@ -83,63 +84,63 @@ void stuprint(const st* p);                             /*打印*/
 void Capacity(st* p);                                   /*增容*/
 
 
-int cmp_num(const void* a, const void* b)                
+static int cmp_num(const void* a, const void* b)                
 {
     return ((stu*)a)->num - ((stu*)b)->num;
 }
-int cmp_name(const void* a, const void* b)
+static int cmp_name(const void* a, const void* b)
 {
     return strcmp(((stu*)a)->name, ((stu*)b)->name);
 }
-int cmp_age(const void* a, const void* b)
+static int cmp_age(const void* a, const void* b)
 {
     return ((stu*)a)->age - ((stu*)b)->age;
 }
-int cmp_sex(const void* a, const void* b)
+static int cmp_sex(const void* a, const void* b)
 {
     return strcmp(((stu*)a)->sex, ((stu*)b)->sex);
 }
-int cmp_tel(const void* a, const void* b)
+static int cmp_tel(const void* a, const void* b)
 {
     return ((stu*)a)->tel - ((stu*)b)->tel;
 }
-int cmp_address(const void* a, const void* b)
+static int cmp_address(const void* a, const void* b)
 {
     return strcmp(((stu*)a)->address, ((stu*)b)->address);
 }
-int cmp_identity_card(const void* a, const void* b)
+static int cmp_identity_card(const void* a, const void* b)
 {
     return ((stu*)a)->identity_card - ((stu*)b)->identity_card;
 }
-int cmp_Chinese(const void* a, const void* b)
+static int cmp_Chinese(const void* a, const void* b)
 {
     return ((stu*)a)->wing.Chinese - ((stu*)b)->wing.Chinese;
 }
-int cmp_Math(const void* a, const void* b)
+static int cmp_Math(const void* a, const void* b)
 {
     return ((stu*)a)->wing.Math - ((stu*)b)->wing.Math;
 }
-int cmp_English(const void* a, const void* b)
+static int cmp_English(const void* a, const void* b)
 {
     return ((stu*)a)->wing.English - ((stu*)b)->wing.English;
 }
-int cmp_politics(const void* a, const void* b)
+static int cmp_politics(const void* a, const void* b)
 {
     return ((stu*)a)->wing.politics - ((stu*)b)->wing.politics;
 }
-int cmp_history(const void* a, const void* b)
+static int cmp_history(const void* a, const void* b)
 {
     return ((stu*)a)->wing.history - ((stu*)b)->wing.history;
 }
-int cmp_geography(const void* a, const void* b)
+static int cmp_geography(const void* a, const void* b)
 {
     return ((stu*)a)->wing.geography - ((stu*)b)->wing.geography;
 }
-int cmp_biology(const void* a, const void* b)
+static int cmp_biology(const void* a, const void* b)
 {
     return ((stu*)a)->wing.biology - ((stu*)b)->wing.biology;
 }
-int cmp_chemistry(const void* a, const void* b)
+static int cmp_chemistry(const void* a, const void* b)
 {
     return ((stu*)a)->wing.chemistry - ((stu*)b)->wing.chemistry;
 }
@@ -185,11 +186,10 @@ void initialize(st* s)                                  /*初始化*/
 void Capacity(st* p)                                    /*增容*/
 {
     assert(p != NULL);
-    
-    if (p->size < p->capacity) {
+    if (p->size < p->capacity) 
+    {
         return;
     }
-
     size_t new_capacity = p->capacity * Capacity_increase_multiple;
     if (new_capacity <= p->capacity) 
     {  // 检查溢出
@@ -200,8 +200,7 @@ void Capacity(st* p)                                    /*增容*/
     stu* new_arr = (stu*)realloc(p->arr, sizeof(stu) * new_capacity);
     if (new_arr == NULL)
     {
-        fprintf(stderr, "内存重分配失败: 无法分配 %zu 字节\n",
-                sizeof(stu) * new_capacity);
+        fprintf(stderr, "内存重分配失败: 无法分配 %zu 字节\n",sizeof(stu) * new_capacity);
         exit(EXIT_FAILURE);
     }
 
@@ -255,19 +254,22 @@ void stuHeader_removal(st* p)                            /*头删*/
 void stuInsert_in_the_middle(st* p, stu* x, size_t pos)  /*中插*/
 {
     assert(p!= NULL);
-    if (pos < 0 || pos > p->size) 
+    if (pos < 0 || pos > p->size || p->size == 0) 
     {
-        printf("插入位置无效!\n");
+        printf("当前没有人数或插入位置无效!\n");
         free(x);
         return;
     }
-    Capacity(p);
-    for (int i = p->size; i > pos; i--)
+    if(p->size >= p->capacity)
+    {
+        Capacity(p);
+    }
+    p->size++;
+    for (int i = p->size-1; i > pos; i--)
     {
         p->arr[i] = p->arr[i - 1];
     }
     p->arr[pos] = *x;
-    p->size++;
     free(x);
 }
 
@@ -275,9 +277,9 @@ void stuInsert_in_the_middle(st* p, stu* x, size_t pos)  /*中插*/
 void stuIntermediate_deletion(st* p, size_t pos)         /*中删*/
 {
     assert(p!= NULL);
-    if (pos < 0 || pos >= p->size) 
+    if (pos < 0 || pos >= p->size || p->size == 0) 
     {
-        printf("删除位置无效!\n");
+        printf("当前没有人数或删除位置无效!\n");
         return;
     }
     Delete(p, pos);
@@ -311,6 +313,11 @@ void stuTail_deletion(st* p)                            /*尾删*/
 void stuprint(const st* p)                              /*打印*/
 {
     assert(p!= NULL);
+    if(p->size == 0)
+    {
+        printf("当前人数为 0!请输入信息！\n");
+        return;
+    }
     printf("当前人数:%zu\n", p->size);
     for (size_t i = 0; i < p->size; i++)
     {
@@ -389,7 +396,7 @@ void Write_file(FILE* fp, st* p)                       /*写入*/
     {
         for (size_t i = 0; i < p->size; i++)
         {
-            fprintf(fp, "%d %s %d %s %lld %s %lld %d %d %d %d %d %d %d %d\n",
+            fprintf(fp, "%8d %15s %2d %6s %11lld %15s %18lld %3d %3d %3d %3d %3d %3d %3d %3d\n",
             p->arr[i].num,p->arr[i].name,p->arr[i].age,p->arr[i].sex,p->arr[i].tel,
             p->arr[i].address,p->arr[i].identity_card,p->arr[i].wing.Chinese,
             p->arr[i].wing.Math,p->arr[i].wing.English,p->arr[i].wing.politics,
@@ -399,6 +406,7 @@ void Write_file(FILE* fp, st* p)                       /*写入*/
         }
         printf("\n写入成功!\n");
         printf("当前写入人数:%zu\n", p->size);
+        printf("当容量为：%zu\n", p->capacity);
     }
 }
 int safe_input(const char* prompt, const char* format, void* value) 
@@ -433,12 +441,8 @@ stu* stuinport()
     }
     memset(stg, 0, sizeof(stu));
     printf("请输入学生信息:\n\a");
-    struct {
-        const char* prompt;
-        const char* format;
-        void* value;
-        int (*validator)(void*);
-        } fields[] = 
+    struct {const char* prompt; const char* format; void* value;int (*validator)(void*);}
+    fields[] = 
                 {
                     {"学号:", "%d", &stg->num, NULL},
                     {"姓名:", "%19s", stg->name, (int(*)(void*))validate_string},
@@ -563,13 +567,14 @@ int main()
     st p;
     initialize(&p);
     size_t pos = 0;
-    FILE* fp = fopen("C:\\Users\\C1373\\Desktop\\students_data.txt", "r");
+    FILE* fp = fopen(Read_address, "r");
     if (fp == NULL)
     {
         printf("文件不存在,请创建文件!\n");
         system("pause");
     }
-    if(setvbuf(fp, NULL, _IOFBF, 8192)!= 0) 
+    if(setvbuf(fp, NULL, _IOFBF, 1048576)!= 0)
+    //申请1MB缓存 
     { 
         perror("setvbuf");
         printf("缓存申请失败!\n");
@@ -583,13 +588,26 @@ int main()
         {
             case EXITS:
                 printf("退出成功!\n");
+                free(p.arr);
+                fclose(fp);
+                p.arr = NULL;
+                fp= NULL;
                 return 0;
             case ONE:
                 stuHeader_removal(&p);  
                 break;
             case TWO:
-                printf("请输入插入位置人数编号:"); scanf("%zu", &pos);
-                stuInsert_in_the_middle(&p, stuinport(), pos);
+                printf("请输入插入位置人数编号:");
+                scanf("%zu", &pos);
+                if (pos > p.size + 1 || pos < 1 || pos == 0)
+                {
+                    printf("位置不合理!\n");
+                    break;
+                }
+                else
+                {
+                    stuInsert_in_the_middle(&p, stuinport(), pos);
+                }
                 break;
             case THREE:
                 printf("请输入删除位置人数编号:"); scanf("%zu", &pos);
@@ -610,11 +628,11 @@ int main()
             case EIGHT:
                 {
                     fclose(fp);
-                    fp = fopen("C:\\Users\\C1373\\Desktop\\students_data.txt", "w");
+                    fp = fopen(Write_address, "w");
                     if (fp == NULL)
                     {
                         perror("fopen");
-                        printf("无法打开文件进行写入!\n");
+                        printf("无法打开文件进行写入!按任意键进行下一步\n");
                         system("pause");
                         break;
                     }
