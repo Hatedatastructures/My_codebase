@@ -100,12 +100,6 @@ void Read_file(FILE* fp, st* p);
 // 写入文件函数
 void Write_file(FILE* fp, st* p);
 
-// 安全输入函数
-int safe_input(const char* prompt, const char* format, void* value);
-
-// 字符串验证函数
-int validate_string(const char* str, size_t max_len);
-
 // 学生信息输入函数
 stu* stuinput();
 
@@ -322,7 +316,7 @@ static BOOL MainSubjectjudgment(const void* MainSubject)
 {
     if((*(subjects*)MainSubject) < 0 || (*(subjects*)MainSubject) > 150)
     {
-        printf("输入错误!,成绩不能大于150\n");
+        printf("输入错误!,成绩不合理\n");
         return FALSE;
     }
     else
@@ -634,26 +628,6 @@ void Write_file(FILE* fp, st* p)                       /*写入*/
         printf("当前写入人数:%zu\n", p->size);
         printf("当容量为：%zu\n", p->capacity);
     }
-}
-int safe_input(const char* prompt, const char* format, void* value) 
-{
-    while (1) 
-    {
-        printf("%s", prompt);
-        if (scanf(format, value) == 1) 
-        {
-            while (getchar() != '\n');
-            return 1;
-        }
-        printf("输入无效，请重新输入!\n");
-
-        while (getchar() != '\n');
-    }
-}
-
-int validate_string(const char* str, size_t max_len) 
-{
-    return str && strlen(str) > 0 && strlen(str) < max_len;
 }
 
 stu* stuinput()                            /*输入*/
