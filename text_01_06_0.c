@@ -5,11 +5,12 @@
 #include <windows.h>
 
 #define NAME_MAX 20                                     /*姓名*/
-#define ADDRESS_MAX 100                                 /*地址*/
+#define ADDRESS_MAX 200                                 /*地址*/
 #define SEX_MAX 10                                      /*性别*/
 #define Capacity_increase_multiple 2                    /*倍数*/
 #define Write_address "C:\\Users\\C1373\\Desktop\\students_data.txt"
 #define Read_address  "C:\\Users\\C1373\\Desktop\\students_data.txt"
+typedef unsigned char subjects;
 enum medu
 {
     EXITS,
@@ -35,14 +36,14 @@ typedef int (*cmp_func_t)(const void*, const void*);
 
 typedef struct student
 {
-    unsigned char Chinese;                              /*语文*/
-    unsigned char Math;                                 /*数学*/
-    unsigned char English;                              /*英语*/
-    unsigned char politics;                             /*政治*/
-    unsigned char history;                              /*历史*/
-    unsigned char geography;                            /*地理*/
-    unsigned char biology;                              /*生物*/
-    unsigned char chemistry;                            /*化学*/
+    subjects Chinese;                                   /*语文*/
+    subjects Math;                                      /*数学*/
+    subjects English;                                   /*英语*/
+    subjects politics;                                  /*政治*/
+    subjects history;                                   /*历史*/
+    subjects geography;                                 /*地理*/
+    subjects biology;                                   /*生物*/
+    subjects chemistry;                                 /*化学*/
 } s;
 typedef struct students
 {
@@ -63,26 +64,109 @@ typedef struct studentss
     size_t capacity;                                    /*当前容量*/
 } st;
 
+// 初始化函数
+void initialize(st* s);
 
+// 增容函数
+void Capacity(st* p);
 
-void initialize(st* s);                                 /*初始*/
+// 删除函数
+void Delete(st* p, int index);
 
-void stuHead_insertion(st* p, stu* x);                  /*头插*/
+// 头插函数
+void stuHead_insertion(st* p, stu* x);
 
-void stuHeader_removal(st* p);                          /*头删*/
+// 头删函数
+void stuHeader_removal(st* p);
 
-void stuInsert_in_the_middle(st* p, stu* x, size_t pos);/*中插*/
+// 中插函数
+void stuInsert_in_the_middle(st* p, stu* x, size_t pos);
 
-void stuIntermediate_deletion(st* p, size_t pos);       /*中删*/
+// 中删函数
+void stuIntermediate_deletion(st* p, size_t pos);
 
-void stuTail_insertion(st* p, stu* x);                  /*尾插*/
+// 尾插函数
+void stuTail_insertion(st* p, stu* x);
 
-void stuTail_deletion(st* p);                           /*尾删*/
+// 尾删函数
+void stuTail_deletion(st* p);
 
-void stuprint(const st* p);                             /*打印*/
+// 打印函数
+void stuprint(const st* p);
 
-void Capacity(st* p);                                   /*增容*/
+// 读取文件函数
+void Read_file(FILE* fp, st* p);
 
+// 写入文件函数
+void Write_file(FILE* fp, st* p);
+
+// 安全输入函数
+int safe_input(const char* prompt, const char* format, void* value);
+
+// 字符串验证函数
+int validate_string(const char* str, size_t max_len);
+
+// 学生信息输入函数
+stu* stuinput();
+
+// 排序选择函数
+size_t sorts();
+
+// 排序函数
+void my_sort(st* p, size_t index);
+
+// 显示菜单函数
+void display_menu();
+
+// 比较函数
+static int cmp_num(const void* a, const void* b);
+
+static int cmp_name(const void* a, const void* b);
+
+static int cmp_age(const void* a, const void* b);
+
+static int cmp_sex(const void* a, const void* b);
+
+static int cmp_tel(const void* a, const void* b);
+
+static int cmp_address(const void* a, const void* b);
+
+static int cmp_identity_card(const void* a, const void* b);
+
+static int cmp_Chinese(const void* a, const void* b);
+
+static int cmp_Math(const void* a, const void* b);
+
+static int cmp_English(const void* a, const void* b);
+
+static int cmp_politics(const void* a, const void* b);
+
+static int cmp_history(const void* a, const void* b);
+
+static int cmp_geography(const void* a, const void* b);
+
+static int cmp_biology(const void* a, const void* b);
+
+static int cmp_chemistry(const void* a, const void* b);
+
+// 输入验证函数
+static BOOL namejudgment(const void* name);
+
+static BOOL agejudgment(const void* age);
+
+static BOOL sexjudgment(const void* sex);
+
+static BOOL teljudgment(const void* tel);
+
+static BOOL IDnumberjudgment(const void* identity_card);
+
+static BOOL MainSubjectjudgment(const void* MainSubject);
+
+static BOOL Sub_sectionjudgment(const void* Sub_section);
+
+static BOOL Sub_sectionsjudgment(const void* Sub_sections);
+
+static BOOL stuinputs(char* Promptwords, char* Placeholders, void* address);
 
 static int cmp_num(const void* a, const void* b)                
 {
@@ -144,7 +228,150 @@ static int cmp_chemistry(const void* a, const void* b)
 {
     return ((stu*)a)->wing.chemistry - ((stu*)b)->wing.chemistry;
 }
-
+static BOOL namejudgment(const void* name)
+{
+    char *p = (char*)name;
+    for(subjects i = 0; i < strlen(p); i++)
+    {
+        if(!p[i] < 0 || !p[i] > 10)
+        {
+            printf("输入错误!,姓名只能为汉字或字母!\n");
+            return FALSE;
+        }
+    }
+    return TRUE;
+}
+static BOOL agejudgment(const void* age)
+{
+    if((*(int*)age) == 0 || (*(int*)age >= 150))
+    {
+        printf("输入错误!,年龄不能大于等于150!\n");
+        return FALSE;
+    }
+    else
+    {
+        return TRUE;
+    }
+}
+static BOOL sexjudgment(const void* sex)
+{
+    if(strcmp(sex, "男") == 0 || strcmp(sex, "女") == 0 || strcmp(sex, "man") == 0 || strcmp(sex, "woman") == 0)
+    {
+        return TRUE;
+    }
+    else
+    {
+        printf("输入错误!,性别只能为男或女\n");
+        return FALSE;
+    }
+    
+}
+static BOOL teljudgment(const void* tel)
+{
+    long long* p = (long long*)tel;
+    subjects len = 1;
+    while(1)
+    {
+        if(*p  > 10)
+        {
+            *p /= 10;
+            len++;
+        }
+        else
+        {
+            break;
+        }
+    }
+    if(len != 11)
+    {
+        printf("输入错误!,电话号码必须为11位,当前%d位\n", len);
+        return FALSE;
+    }
+    else
+    {
+        return TRUE;
+    }
+}
+static BOOL IDnumberjudgment(const void* identity_card)
+{
+    long long* p = (long long*)identity_card;
+    subjects len = 1;
+    while(1)
+    {
+        if(*p  > 10)
+        {
+            *p /= 10;
+            len++;
+        }
+        else
+        {
+            break;
+        }
+    }
+    if(len != 18)
+    {
+        printf("输入错误!,身份证号必须为18位,当前%d位\n", len);
+        return FALSE;
+    }
+    else
+    {
+        return TRUE;
+    }
+}
+static BOOL MainSubjectjudgment(const void* MainSubject)
+{
+    if((*(subjects*)MainSubject) < 0 || (*(subjects*)MainSubject) > 150)
+    {
+        printf("输入错误!,成绩不能大于150\n");
+        return FALSE;
+    }
+    else
+    {
+        return TRUE;
+    }
+}
+static BOOL Sub_sectionjudgment(const void* Sub_section)
+{
+    if((*(subjects*)Sub_section) < 0 || (*(subjects*)Sub_section) > 70)
+    {
+        printf("输入错误!,成绩不合理\n");
+        return FALSE;
+    }
+    else
+    {
+        return TRUE;
+    }
+}
+static BOOL Sub_sectionsjudgment(const void* Sub_sections)
+{
+    if((*(subjects*)Sub_sections) < 0 || (*(subjects*)Sub_sections) > 50)
+    {
+        printf("输入错误!,成绩不合理\n");
+        return FALSE;
+    }
+    else
+    {
+        return TRUE;
+    }
+}
+static BOOL stuinputs(char*Promptwords, char*Placeholders,void*address)
+{
+    while(1)
+    {
+        printf("%s",Promptwords);
+        if(scanf(Placeholders,address) !=EOF)
+        {
+            // while (getchar() != '\n')
+            return TRUE;
+        }
+        else
+        {
+            printf("输入错误!\n");
+            continue;
+            // while (getchar() != '\n');
+        }
+    }
+}                            
 static cmp_func_t cmp_funcs[] = 
 {
     NULL,           
@@ -174,6 +401,8 @@ void initialize(st* s)                                  /*初始化*/
     if (s->arr == NULL)
     {
         fprintf(stderr, "内存分配失败: 无法分配 %zu 字节\n", sizeof(stu) * INITIAL_CAPACITY);
+    
+        free(s);
         exit(EXIT_FAILURE);
     }
     
@@ -181,7 +410,6 @@ void initialize(st* s)                                  /*初始化*/
     s->capacity = INITIAL_CAPACITY;
     memset(s->arr, 0, sizeof(stu) * INITIAL_CAPACITY);  // 初始化内存
 }
-
 
 void Capacity(st* p)                                    /*增容*/
 {
@@ -345,13 +573,12 @@ void Read_file(FILE* fp, st* p)                         /*读取*/
     
     while (fgets(line, sizeof(line), fp)) 
     {
-        // 跳过空行和注释行
+        // 跳过空行和注释
         if (line[0] == '\n' || line[0] == '#') 
         {
             line_num++;
             continue;
         }
-
         int result = sscanf(line, "%d %19s %d %9s %lld %99s %lld %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu",
             &stg.num, stg.name, &stg.age, stg.sex, &stg.tel, stg.address, &stg.identity_card,
             &stg.wing.Chinese, &stg.wing.Math, &stg.wing.English, &stg.wing.politics,
@@ -362,8 +589,7 @@ void Read_file(FILE* fp, st* p)                         /*读取*/
             fprintf(stderr, "文件格式错误: 第 %d 行\n", line_num);
             continue;
         }
-
-        // 验证数据
+        // 验证内容
         if (stg.age < 0 || stg.age > 150) 
         {
             fprintf(stderr, "年龄无效: 第 %d 行\n", line_num);
@@ -411,7 +637,8 @@ void Write_file(FILE* fp, st* p)                       /*写入*/
 }
 int safe_input(const char* prompt, const char* format, void* value) 
 {
-    while (1) {
+    while (1) 
+    {
         printf("%s", prompt);
         if (scanf(format, value) == 1) 
         {
@@ -429,64 +656,64 @@ int validate_string(const char* str, size_t max_len)
     return str && strlen(str) > 0 && strlen(str) < max_len;
 }
 
-stu* stuinport() 
+stu* stuinput()                            /*输入*/
 {
-    stu* stg = (stu*)malloc(sizeof(stu));
-    if (!stg) 
+    stu* input = (stu*)malloc(sizeof(stu));
+    if (!input) 
     {
         perror("malloc");
         printf("内存申请失败!\n");
         system("pause");
         return NULL;
     }
-    memset(stg, 0, sizeof(stu));
+    memset(input, 0, sizeof(stu));
     printf("请输入学生信息:\n\a");
-    struct {const char* prompt; const char* format; void* value;int (*validator)(void*);}
-    fields[] = 
-                {
-                    {"学号:", "%d", &stg->num, NULL},
-                    {"姓名:", "%19s", stg->name, (int(*)(void*))validate_string},
-                    {"年龄:", "%d", &stg->age, NULL},
-                    {"性别:", "%9s", stg->sex, (int(*)(void*))validate_string},
-                    {"电话:", "%lld", &stg->tel, NULL},
-                    {"地址:", "%99s", stg->address, (int(*)(void*))validate_string},
-                    {"证号:", "%lld", &stg->identity_card, NULL},
-                    {"语文:", "%hhu", &stg->wing.Chinese, NULL},
-                    {"数学:", "%hhu", &stg->wing.Math, NULL},
-                    {"英语:", "%hhu", &stg->wing.English, NULL},
-                    {"政治:", "%hhu", &stg->wing.politics, NULL},
-                    {"历史:", "%hhu", &stg->wing.history, NULL},
-                    {"地理:", "%hhu", &stg->wing.geography, NULL},
-                    {"生物:", "%hhu", &stg->wing.biology, NULL},
-                    {"化学:", "%hhu", &stg->wing.chemistry, NULL}
-                };
-    for (size_t i = 0; i < sizeof(fields)/sizeof(fields[0]); i++) 
+    struct input
     {
-        while (1) 
+        char* Promptwords;
+        char* Placeholders;
+        void* address;
+        BOOL(*Enteralimit)(const void*);
+    }inputs[] =
+    {
+        {"请输入学号：",    "%d",   &input->num,             NULL},
+        {"请输入姓名：",    "%s",   &input->name,            namejudgment},
+        {"请输入年龄：",    "%d",   &input->age,             agejudgment},
+        {"请输入性别：",    "%s",   &input->sex,             sexjudgment},
+        {"请输入电话：",    "%lld", &input->tel,             teljudgment},
+        {"请输入地址：",    "%s",   &input->address,         NULL},
+        {"请输入证号：",    "%lld", &input->identity_card,   IDnumberjudgment},
+        {"请输入语文成绩：", "%d",  &input->wing.Chinese,    MainSubjectjudgment},
+        {"请输入数学成绩：", "%d",  &input->wing.Math,       MainSubjectjudgment},
+        {"请输入英语成绩：", "%d",  &input->wing.English,    MainSubjectjudgment},
+        {"请输入政治成绩：", "%d",  &input->wing.politics,   Sub_sectionjudgment},
+        {"请输入历史成绩：", "%d",  &input->wing.history,    Sub_sectionsjudgment},
+        {"请输入地理成绩：", "%d",  &input->wing.geography,  Sub_sectionsjudgment},
+        {"请输入生物成绩：", "%d",  &input->wing.biology,    Sub_sectionsjudgment},
+        {"请输入化学成绩：", "%d",  &input->wing.chemistry,  Sub_sectionsjudgment},
+    };
+    for(subjects i = 0; i < sizeof(inputs) / sizeof(inputs[0]); i++)
+    {
+        while (1)
         {
-            if (!safe_input(fields[i].prompt, fields[i].format, fields[i].value)) 
+            if(stuinputs(inputs[i].Promptwords, inputs[i].Placeholders, (void*)inputs[i].address) != FALSE)
             {
-                continue;
-            }
-            if (strcmp(fields[i].prompt, "年龄:") == 0) 
-            {
-                if (stg->age < 0 || stg->age > 150) 
+                if(inputs[i].Enteralimit != NULL)
                 {
-                    printf("年龄必须在0到150之间!\n");
-                    continue;
+                    if(inputs[i].Enteralimit((void*) inputs[i].address) == FALSE)
+                    {
+                        continue;
+                    }
+                }
+                else
+                {
+                    break;
                 }
             }
-            if (fields[i].validator && !fields[i].validator(fields[i].value)) 
-            {
-                printf("输入无效，请重新输入!\n");
-                continue;
-            }
             break;
-        }
+        } 
     }
-    
-    printf("输入成功!\n");
-    return stg;
+    return input;
 }
 size_t sorts()
 {
@@ -508,7 +735,7 @@ size_t sorts()
     printf("15.按化学排序\n");
     size_t inport = 0;
     int flag = 0;
-    while (scanf("%zu", &inport)==EOF || inport < 1 || inport > 15)
+    while (scanf("%zu", &inport) != 1 || inport < 1 || inport > 15)
     {
         if(flag>30)
         {
@@ -531,7 +758,6 @@ void my_sort(st* p, size_t index)                          /*排序*/
         printf("当前没有学生信息,请先输入学生信息!\n");
         exit(-1);
     }
-    
     // 检查索引是否有效
     if (index >= 1 && index <= 15 && cmp_funcs[index] != NULL) 
     {
@@ -606,7 +832,7 @@ int main()
                 }
                 else
                 {
-                    stuInsert_in_the_middle(&p, stuinport(), pos);
+                    stuInsert_in_the_middle(&p, stuinput(), pos);
                 }
                 break;
             case THREE:
@@ -614,7 +840,7 @@ int main()
                 stuIntermediate_deletion(&p, pos);
                 break;
             case FOUR:
-                stuTail_insertion(&p, stuinport());
+                stuTail_insertion(&p, stuinput());
                 break;
             case FIVE:
                 stuTail_deletion(&p);
@@ -653,7 +879,7 @@ int main()
     fp = NULL;
     free(p.arr);
     p.arr = NULL;
-    printf("文件地址:students_data.txt");
+    printf("程序结束!\n");
     system("pause");
     return 0;
 }
