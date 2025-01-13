@@ -11,6 +11,7 @@
 #define Write_address "C:\\Users\\C1373\\Desktop\\students_data.txt"
 #define Read_address  "C:\\Users\\C1373\\Desktop\\students_data.txt"
 typedef unsigned char subjects;
+typedef unsigned int  size_int;
 enum medu
 {
     EXITS,
@@ -222,19 +223,21 @@ static int cmp_chemistry(const void* a, const void* b)
 {
     return ((stu*)a)->wing.chemistry - ((stu*)b)->wing.chemistry;
 }
+
 static BOOL namejudgment(const void* name)
 {
     char *p = (char*)name;
-    for(subjects i = 0; i < strlen(p); i++)
+    if(strlen(p) > 20)
     {
-        if(!p[i] < 0 || !p[i] > 10)
-        {
-            printf("输入错误!,姓名只能为汉字或字母!\n");
-            return FALSE;
-        }
+        printf("输入错误!,姓名不能超过20个字符!\n");
+        return FALSE;
     }
-    return TRUE;
+    else
+    {
+        return TRUE;
+    }
 }
+
 static BOOL agejudgment(const void* age)
 {
     if((*(int*)age) == 0 || (*(int*)age >= 150))
@@ -247,6 +250,7 @@ static BOOL agejudgment(const void* age)
         return TRUE;
     }
 }
+
 static BOOL sexjudgment(const void* sex)
 {
     if(strcmp(sex, "男") == 0 || strcmp(sex, "女") == 0 || strcmp(sex, "man") == 0 || strcmp(sex, "woman") == 0)
@@ -260,6 +264,7 @@ static BOOL sexjudgment(const void* sex)
     }
     
 }
+
 static BOOL teljudgment(const void* tel)
 {
     long long* p = (long long*)tel;
@@ -281,11 +286,13 @@ static BOOL teljudgment(const void* tel)
         printf("输入错误!,电话号码必须为11位,当前%d位\n", len);
         return FALSE;
     }
-    else
+    else    
     {
         return TRUE;
     }
+    
 }
+
 static BOOL IDnumberjudgment(const void* identity_card)
 {
     long long* p = (long long*)identity_card;
@@ -312,6 +319,7 @@ static BOOL IDnumberjudgment(const void* identity_card)
         return TRUE;
     }
 }
+
 static BOOL MainSubjectjudgment(const void* MainSubject)
 {
     if((*(subjects*)MainSubject) < 0 || (*(subjects*)MainSubject) > 150)
@@ -324,6 +332,7 @@ static BOOL MainSubjectjudgment(const void* MainSubject)
         return TRUE;
     }
 }
+
 static BOOL Sub_sectionjudgment(const void* Sub_section)
 {
     if((*(subjects*)Sub_section) < 0 || (*(subjects*)Sub_section) > 70)
@@ -336,6 +345,7 @@ static BOOL Sub_sectionjudgment(const void* Sub_section)
         return TRUE;
     }
 }
+
 static BOOL Sub_sectionsjudgment(const void* Sub_sections)
 {
     if((*(subjects*)Sub_sections) < 0 || (*(subjects*)Sub_sections) > 50)
@@ -348,6 +358,7 @@ static BOOL Sub_sectionsjudgment(const void* Sub_sections)
         return TRUE;
     }
 }
+
 static BOOL stuinputs(char*Promptwords, char*Placeholders,void*address)
 {
     while(1)
@@ -355,17 +366,18 @@ static BOOL stuinputs(char*Promptwords, char*Placeholders,void*address)
         printf("%s",Promptwords);
         if(scanf(Placeholders,address) !=EOF)
         {
-            // while (getchar() != '\n')
+            while (getchar() != '\n');  // 清空输入缓冲区
             return TRUE;
         }
         else
         {
             printf("输入错误!\n");
+            while (getchar() != '\n');  // 清空输入缓冲区
             continue;
-            // while (getchar() != '\n');
         }
     }
-}                            
+}    
+
 static cmp_func_t cmp_funcs[] = 
 {
     NULL,           
@@ -395,9 +407,7 @@ void initialize(st* s)                                  /*初始化*/
     if (s->arr == NULL)
     {
         fprintf(stderr, "内存分配失败: 无法分配 %zu 字节\n", sizeof(stu) * INITIAL_CAPACITY);
-    
-        free(s);
-        exit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);  // 直接退出程序
     }
     
     s->size = 0;
@@ -437,18 +447,42 @@ void Capacity(st* p)                                    /*增容*/
 // 修改 Delete 函数，不分配内存，只进行元素的删除操作
 void Delete(st* p, int index)
 {
-    assert(p!= NULL);
-    if (p->size == 0)
+    assert(p != NULL);
+    if (p->size == 0) 
     {
         printf("当前人数为 0,无法删除!\n");
-        exit(-1);
+        return;
     }
-    // 可根据具体需求添加更复杂的删除逻辑，这里简单将最后一个元素覆盖要删除的元素
-    if (index < p->size - 1) 
+    if (index < 0 || index >= p->size) 
     {
-        p->arr[index] = p->arr[p->size - 1];
+        printf("无效的索引!\n");
+        return;
+    }
+    
+    // 将后面的元素前移
+    for (int i = index; i < p->size - 1; i++) 
+    {
+        p->arr[i] = p->arr[i + 1];
     }
     p->size--;
+    
+    // 如果容量过大，可以适当缩小
+    if (p->size < p->capacity / 4 && p->capacity > 10) 
+    {
+        size_t new_capacity = p->capacity / 2;
+        stu* new_arr = (stu*)realloc(p->arr, sizeof(stu) * new_capacity);
+        if (new_arr == NULL) 
+        {
+            fprintf(stderr, "内存重分配失败: 无法分配 %zu 字节\n", sizeof(stu) * new_capacity);
+            // 保持原有容量，不缩小
+            return;
+        }
+        p->arr = new_arr;
+        p->capacity = new_capacity;
+        
+        // 初始化新分配的内存
+        memset(p->arr + p->size, 0, sizeof(stu) * (new_capacity - p->size));
+    }
 }
 
 
@@ -516,7 +550,30 @@ void stuIntermediate_deletion(st* p, size_t pos)         /*中删*/
 void stuTail_insertion(st* p, stu* x)                   /*尾插*/
 {
     assert(p!= NULL);
-    Capacity(p);
+    if (x == NULL) {
+        fprintf(stderr, "错误: 传入的学生指针为空\n");
+        return;
+    }
+    
+    // 检查容量并尝试扩容
+    if (p->size >= p->capacity) 
+    {
+        size_t new_capacity = p->capacity * Capacity_increase_multiple;
+        stu* new_arr = (stu*)realloc(p->arr, sizeof(stu) * new_capacity);
+        if (new_arr == NULL) 
+        {
+            fprintf(stderr, "内存分配失败: 无法分配 %zu 字节\n", sizeof(stu) * new_capacity);
+            free(x);  // 释放传入的学生结构体
+            return;
+        }
+        p->arr = new_arr;
+        p->capacity = new_capacity;
+        
+        // 初始化新分配的内存
+        memset(p->arr + p->size, 0, sizeof(stu) * (new_capacity - p->size));
+    }
+    
+    // 插入新学生
     p->arr[p->size] = *x;
     p->size++;
     free(x);
@@ -527,8 +584,24 @@ void stuTail_insertion(st* p, stu* x)                   /*尾插*/
 void stuTail_deletion(st* p)                            /*尾删*/
 {
     assert(p!= NULL);
-    Delete(p, p->size - 1);
-    printf("删除成功!\n");
+    if(p->size == 0)
+    {
+        printf("当前没有学生信息!\n");
+        return;
+    }
+    
+    printf("确定要删除最后一名学生吗？(Y/N) ");
+    char confirm;
+    scanf(" %c", &confirm);
+    if(toupper(confirm) == 'Y')
+    {
+        Delete(p, p->size - 1);
+        printf("删除成功!\n");
+    }
+    else
+    {
+        printf("取消删除操作\n");
+    }
 }
 
 
@@ -567,7 +640,6 @@ void Read_file(FILE* fp, st* p)                         /*读取*/
     
     while (fgets(line, sizeof(line), fp)) 
     {
-        // 跳过空行和注释
         if (line[0] == '\n' || line[0] == '#') 
         {
             line_num++;
@@ -583,7 +655,6 @@ void Read_file(FILE* fp, st* p)                         /*读取*/
             fprintf(stderr, "文件格式错误: 第 %d 行\n", line_num);
             continue;
         }
-        // 验证内容
         if (stg.age < 0 || stg.age > 150) 
         {
             fprintf(stderr, "年龄无效: 第 %d 行\n", line_num);
@@ -603,6 +674,7 @@ void Read_file(FILE* fp, st* p)                         /*读取*/
     }
 
     printf("成功读取 %zu 条记录\n", p->size);
+    fclose(fp);  // 关闭文件
 }
 void Write_file(FILE* fp, st* p)                       /*写入*/
 {
@@ -628,6 +700,7 @@ void Write_file(FILE* fp, st* p)                       /*写入*/
         printf("当前写入人数:%zu\n", p->size);
         printf("当容量为：%zu\n", p->capacity);
     }
+    fclose(fp);  // 关闭文件
 }
 
 stu* stuinput()                            /*输入*/
@@ -770,11 +843,11 @@ int main()
     FILE* fp = fopen(Read_address, "r");
     if (fp == NULL)
     {
-        printf("文件不存在,请创建文件!\n");
+        printf("无法打开文件 %s,请检查文件是否存在!\n", Read_address);
         system("pause");
+        return -1;  // 立即退出程序
     }
     if(setvbuf(fp, NULL, _IOFBF, 1048576)!= 0)
-    //申请1MB缓存 
     { 
         perror("setvbuf");
         printf("缓存申请失败!\n");
