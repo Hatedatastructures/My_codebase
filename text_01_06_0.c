@@ -8,8 +8,10 @@
 #define ADDRESS_MAX 200                                 /*地址*/
 #define SEX_MAX 10                                      /*性别*/
 #define Capacity_increase_multiple 2                    /*倍数*/
+
 #define Write_address "C:\\Users\\C1373\\Desktop\\students_data.txt"
 #define Read_address  "C:\\Users\\C1373\\Desktop\\students_data.txt"
+
 typedef unsigned char subjects;
 typedef unsigned int  size_int;
 enum medu
@@ -64,6 +66,29 @@ typedef struct studentss
     size_t size;                                        /*当前元素个数*/
     size_t capacity;                                    /*当前容量*/
 } st;
+
+/*
+                          _ooOoo_
+                         o8888888o
+                         88" . "88
+                         (| -_- |)
+                         O\  =  /O
+                      ____/`---'\____
+                    .'  \\|     |//  `.
+                   /  \\|||  :  |||//  \
+                  /  _||||| -:- |||||-  \
+                  |   | \\\  -  /// |   |
+                  | \_|  ''\---/''  |   |
+                  \  .-\__  `-`  ___/-. /
+                ___`. .'  /--.--\  `. . __
+             ."" '<  `.___\_<|>_/___.'  >'"".
+            | | :  `- \`.;`\ _ /`;.`/ - ` : | |
+            \  \ `-.   \_ __\ /__ _/   .-` /  /
+       ======`-.____`-.___\_____/___.-`____.-'======
+                          `=---='
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     佛祖保佑        永无BUG
+*/
 
 // 初始化函数
 void initialize(st* s);
@@ -223,13 +248,12 @@ static int cmp_chemistry(const void* a, const void* b)
 {
     return ((stu*)a)->wing.chemistry - ((stu*)b)->wing.chemistry;
 }
-
 static BOOL namejudgment(const void* name)
 {
     char *p = (char*)name;
     if(strlen(p) > 20)
     {
-        printf("输入错误!,姓名不能超过20个字符!\n");
+        printf("输入错误!,该限制不能超过20个字符!\n");
         return FALSE;
     }
     else
