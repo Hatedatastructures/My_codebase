@@ -1,7 +1,5 @@
 /*双向链表例子*/
-/*2025_2_17开始写，3月1粗略修改完bug*/
-/*文件测试用例在02_18_0.c*/
-/*上一版本在02_17_1.c*/
+/*2025_2_17开始写，2_26粗略修改完bug*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -72,11 +70,6 @@ typedef struct compare
     BOOL(*Enteralimit)(const void*, const void*);
     void* limit;
 }com;
-typedef struct list
-{
-    char* str;
-}namelist;
-
 typedef enum stu_Sode_list
 {
     EXITS,
@@ -450,8 +443,8 @@ void Head_deletion(Sode** head)
     Pointer_judgment(head, "Head_deletion");
     if (*head != NULL)
     {
-        Sode* Old_Nodes = (*head)->next;
         (*head)->next->prev = NULL;
+        Sode* Old_Nodes = (*head)->next;
         (*head)->next = NULL;
         free(*head);
         *head = Old_Nodes;
@@ -678,7 +671,131 @@ BOOL Sode_revise(Sode** head, uint32_t num)
     return TRUE;
 }/*修改指定位置数据*/
 
-
+int64_t compare (const void* a, const void* b ,const char* c)
+{
+    strlist list[] = 
+        {
+            {"学号", &((students*)a)->num,              &((students*)b)->num},
+            {"年龄", &((students*)a)->age,              &((students*)b)->age},
+            {"性别", &((students*)a)->sex,              &((students*)b)->sex},
+            {"证号", &((students*)a)->identity_card,    &((students*)b)->identity_card},
+            {"语文", &((students*)a)->grades.Chinese,   &((students*)b)->grades.Chinese},
+            {"数学", &((students*)a)->grades.Math,      &((students*)b)->grades.Math},
+            {"英语", &((students*)a)->grades.English,   &((students*)b)->grades.English},
+            {"政治", &((students*)a)->grades.politics,  &((students*)b)->grades.politics},
+            {"历史", &((students*)a)->grades.history,   &((students*)b)->grades.history},
+            {"地理", &((students*)a)->grades.geography, &((students*)b)->grades.geography},
+            {"生物", &((students*)a)->grades.biology,   &((students*)b)->grades.biology},
+            {"化学", &((students*)a)->grades.chemistry, &((students*)b)->grades.chemistry},
+            {"物理", &((students*)a)->grades.physics,   &((students*)b)->grades.physics}
+        };
+    for (uint8_t i = 0; i < sizeof(list) / sizeof(list[0]); i++)
+    {
+        if (strcmp(list[i].Placeholding, c) == 0)
+        {
+            return (*(int64_t*)list[i].Pointer_field - *(uint64_t*)list[i].pointer_field_two);
+        }
+    }
+    printf("输入排序字符不合法！\n");
+    return INT64_MAX;
+}
+BOOL Insert_sorting(Sode** head, char* data)
+{
+    Pointer_judgment(head, "Insert_sorting");
+    if(*head == NULL)
+    {
+        return FALSE;
+    }
+    uint64_t list_count = 0;
+    uint64_t list_counts = 0;
+    Sode* Ephemeral_nodes = NULL;
+    Sode* current = *head;
+    uint8_t number = 0;
+    Sode* count = *head;
+    while(count->next != NULL)
+    {
+        count = count->next;
+        list_count++;
+    }
+    while(current != NULL)
+    {
+        Sode* temp = Ephemeral_nodes;
+        Sode* slow = NULL;
+        if(Ephemeral_nodes == NULL || compare(Ephemeral_nodes->data, current->data, data) >= 0) /*头插*/
+        {
+            if(Ephemeral_nodes == NULL)
+            {
+                Ephemeral_nodes = current;
+                Ephemeral_nodes->next = NULL;
+                Ephemeral_nodes->prev = NULL;
+                number = 1;
+                list_counts++;
+            }
+            else
+            {
+                while(temp != NULL)
+                {
+                    slow = temp;
+                    temp = temp->prev;
+                    if(compare(temp->data, current->data, data) >= 0)
+                    {
+                        temp->prev = current;
+                        temp->next = slow;
+                        temp = temp->prev;/*防止重复插入*/
+                        number = 1;
+                        list_counts++;
+                        break;
+                    }
+                }
+                temp->prev = NULL;
+            }
+            if(number != 1)
+            {
+                printf("插入前部失败！\n");
+                return FALSE;
+            }
+        }
+        else
+        {
+            while(temp != NULL)
+            {
+                slow = temp ;
+                temp = temp->next;
+                if(compare(Ephemeral_nodes->next->data, current->data, data) <= 0||compare(Ephemeral_nodes->data, current->data, data)!= INT64_MAX)
+                {
+                    temp->next = current;
+                    temp->prev = slow;
+                    temp = temp->next;/*防止重复插入*/
+                    list_counts++;
+                    number = 1;
+                    break;
+                }
+            }
+            temp->next = NULL;
+            if(number == 1)
+            {
+                printf("插入后部失败！\n");
+                return FALSE;
+            }
+        }
+        if(current->next != NULL)
+        {
+           current = current->next;
+        }
+    }
+    if(list_counts != list_count)
+    {
+        printf("插入排序中bug！\n");
+        return FALSE;
+    }
+    else
+    {
+        printf("插入排序成功！\n");
+        *head = Ephemeral_nodes;
+        return TRUE;
+    }
+    printf("插入排序成功！\n");
+}/*插入排序*/
 
 void SodeFile_read(Sode** head, char* file_name)
 {
@@ -816,113 +933,6 @@ void release(Sode** head)
     }
     *head = NULL;
     printf("链表已释放\n");
-}
-BOOL matching(void* Front_pointer, void* rear_pointer, char* name)
-{
-    Pointer_judgment(Front_pointer,"matching");
-    strlist list [] =
-    {
-        {"学号", Front_pointer+offsetof(students, num),             rear_pointer+offsetof(students, num)},
-        {"年龄", Front_pointer+offsetof(students, age),             rear_pointer+offsetof(students, age)},
-        {"性别", Front_pointer+offsetof(students, sex),             rear_pointer+offsetof(students, sex)},
-        {"证号", Front_pointer+offsetof(students, identity_card),   rear_pointer+offsetof(students, identity_card)},
-        {"语文", Front_pointer+offsetof(students, grades.Chinese),  rear_pointer+offsetof(students, grades.Chinese)},
-        {"数学", Front_pointer+offsetof(students, grades.Math),     rear_pointer+offsetof(students, grades.Math)},
-        {"英语", Front_pointer+offsetof(students, grades.English),  rear_pointer+offsetof(students, grades.English)},
-        {"政治", Front_pointer+offsetof(students, grades.politics), rear_pointer+offsetof(students, grades.politics)},
-        {"历史", Front_pointer+offsetof(students, grades.history),  rear_pointer+offsetof(students, grades.history)},
-        {"地理", Front_pointer+offsetof(students, grades.geography),rear_pointer+offsetof(students, grades.geography)},
-        {"生物", Front_pointer+offsetof(students, grades.biology),  rear_pointer+offsetof(students, grades.biology)},
-        {"化学", Front_pointer+offsetof(students, grades.chemistry),rear_pointer+offsetof(students, grades.chemistry)},
-        {"物理", Front_pointer+offsetof(students, grades.physics),  rear_pointer+offsetof(students, grades.physics)},
-    };
-    namelist lists [] =
-    {
-        {"学号"},{"年龄"},{"性别"},{"证号"},{"语文"},{"数学"},{"英语"},{"政治"},{"历史"},{"地理"},{"生物"},{"化学"},{"物理"},
-    };
-    for(int8_t i = 0; i < (int8_t)(sizeof(list)/sizeof(list[0])); i++)
-    {
-        if(strcmp(list[i].Placeholding, name) == 0)
-        {
-            for(int8_t j = 0; j < (int8_t)(sizeof(lists)/sizeof(lists[0])); j++)
-            {
-                if(j >= 4)
-                {
-                    if(*(float*)list[i].Pointer_field - *(float*)list[j].pointer_field_two >= 0)
-                    {
-                        return TRUE;
-                    }
-                }
-                else if( j == 1 || j == 2)
-                {
-                    if(*(char*)list[i].Pointer_field - *(char*)list[j].pointer_field_two >= 0)
-                    {
-                        return TRUE;
-                    }
-                }
-                else if(j == 0 || j == 3)
-                {
-                    if(*(int64_t*)list[i].Pointer_field - *(int64_t*)list[j].pointer_field_two >= 0)
-                    {
-                        return TRUE;
-                    }
-                }
-            }
-        }
-    }
-    return FALSE;
-}
-
-void Insert_sorting(Sode** head,char* file_name)
-//该插入排序为降序
-{
-    Pointer_judgment(head, "Insert_sorting");
-    if(*head == NULL || (*head)->next == NULL)
-    {
-        return;
-    }
-    Sode* sorted = NULL;
-    Sode* current = *head;
-    uint64_t count = 0; //计数器
-    while (current != NULL)
-    {
-        Sode*next = current->next;
-        if(sorted ==NULL)
-        {
-            current->next = NULL;
-            current->prev = NULL;
-            sorted = current;
-            count++;
-        }
-        else if(matching(sorted->data,current->data, file_name) != FALSE)
-        {
-            //插入头
-            current->next = sorted;
-            sorted->prev = current;
-            current->prev = NULL;
-            sorted = current;
-        }
-        else
-        {
-            //插入中间
-            Sode*temp = sorted;
-            while (temp->next != NULL && !matching(current->data, temp->next->data, file_name))
-            {
-                temp = temp->next;
-            }
-            current->next = temp->next;
-            if(temp->next != NULL)
-            {
-                temp->next->prev = current;
-            }
-           temp->next = current;
-           current->prev = temp;
-           count++;
-        }
-        current = next;
-    }
-    printf("排序完成,共改动%llu条数据\n",count);
-    *head = sorted;
 }
 
 void display_menu() 
