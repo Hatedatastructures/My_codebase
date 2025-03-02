@@ -88,7 +88,7 @@ int main()
 {
     const char *filename = "C:\\Users\\C1373\\Desktop\\students_data.txt";
     srand((unsigned int)time(NULL));
-    uint32_t num_students = 1000;
+    uint32_t num_students = 10000;
     FILE *file = fopen(filename, "w");
     if (file == NULL) 
     {

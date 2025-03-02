@@ -1,4 +1,4 @@
-/*堆*/
+/*大堆*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -50,15 +50,16 @@ void Large_pilew_sorting(Complete_binary_tree* tree)//参数：完全二叉树
 
 int main()
 {
-    int array[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40};
-    Complete_binary_tree tree;
-    tree.data = array;
-    tree.size = sizeof(array)/sizeof(array[0]);
-    tree.capacity = tree.size;
-    Large_pilew_sorting(&tree);
-    for (uint32_t number = 0; number < (uint32_t)tree.size; number++)
+    //大堆排序，从大到小
+    Heap_array array[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40};
+    Complete_binary_tree*tree = (Complete_binary_tree*)malloc(sizeof(Complete_binary_tree));
+    tree->data = array;
+    tree->size = sizeof(array)/sizeof(array[0]);
+    tree->capacity = tree->size;
+    Large_pilew_sorting(tree);
+    for (uint32_t number = 0; number < (uint32_t)tree->size; number++)
     {
-        printf("%d ",tree.data[number]);
+        printf("%d ",tree->data[number]);
     }
     printf("\n");
     return 0;

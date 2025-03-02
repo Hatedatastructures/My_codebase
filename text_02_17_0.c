@@ -846,25 +846,44 @@ BOOL matching(void* Front_pointer, void* rear_pointer, char* name)
         {
             for(int8_t j = 0; j < (int8_t)(sizeof(lists)/sizeof(lists[0])); j++)
             {
-                if(j >= 4)
+                // 根据字段类型进行比较
+                if (i >= 4) // 成绩字段（浮点数）
                 {
-                    if(*(float*)list[i].Pointer_field - *(float*)list[j].pointer_field_two >= 0)
-                    {
-                        return TRUE;
-                    }
+                    float front = *(float*)list[i].Pointer_field;
+                    float rear = *(float*)list[i].pointer_field_two;
+                    return (front >= rear); // 降序排列
                 }
-                else if( j == 1 || j == 2)
+                else if (i == 2) // 性别（字符串）
                 {
-                    if(*(char*)list[i].Pointer_field - *(char*)list[j].pointer_field_two >= 0)
-                    {
-                        return TRUE;
-                    }
+                    const char* front_sex = (const char*)list[i].Pointer_field;
+                    const char* rear_sex = (const char*)list[i].pointer_field_two;
+                    return (strcmp(front_sex, rear_sex) >= 0); // 按字典序降序
                 }
-                else if(j == 0 || j == 3)
+                else // 学号、年龄、证号（整数）
                 {
-                    if(*(int64_t*)list[i].Pointer_field - *(int64_t*)list[j].pointer_field_two >= 0)
+                    // 根据实际类型转换
+                    switch (i)
                     {
-                        return TRUE;
+                        case 0: // 学号（uint32_t）
+                        {
+                            uint32_t front = *(uint32_t*)list[i].Pointer_field;
+                            uint32_t rear = *(uint32_t*)list[i].pointer_field_two;
+                            return (front >= rear);
+                        }
+                        case 1: // 年龄（uint8_t）
+                        {
+                            uint8_t front = *(uint8_t*)list[i].Pointer_field;
+                            uint8_t rear = *(uint8_t*)list[i].pointer_field_two;
+                            return (front >= rear);
+                        }
+                        case 3: // 证号（uint64_t）
+                        {
+                            uint64_t front = *(uint64_t*)list[i].Pointer_field;
+                            uint64_t rear = *(uint64_t*)list[i].pointer_field_two;
+                            return (front >= rear);
+                        }
+                        default:
+                            return FALSE; 
                     }
                 }
             }
@@ -894,12 +913,12 @@ void Insert_sorting(Sode** head,char* file_name)
             sorted = current;
             count++;
         }
-        else if(matching(sorted->data,current->data, file_name) != FALSE)
+        else if(matching(current->data,sorted->data,file_name) != FALSE)
         {
             //插入头
             current->next = sorted;
-            sorted->prev = current;
             current->prev = NULL;
+            sorted->prev = current;
             sorted = current;
         }
         else
