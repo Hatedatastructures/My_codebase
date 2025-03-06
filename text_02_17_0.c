@@ -57,14 +57,14 @@ typedef struct input
     char* Promptwords;
     char* Placeholders;
     void* address;
-    void* limit;
+    void* Limit_parameters;
     BOOL(*Enteralimit)(const void*, const void*);
 }inputs;
 typedef struct str
 {
     const char* Placeholding;
-    const void* Pointer_field;
-    const void* pointer_field_two;
+    const void* Compare_pointers_A;
+    const void* Compare_pointers_B;
 }strlist;
 typedef struct compare
 {
@@ -391,7 +391,7 @@ void stuinput(students* input)                            /*输入*/
             {
                 if (inputs[i].Enteralimit != NULL)
                 {
-                    if (inputs[i].Enteralimit(inputs[i].address, inputs[i].limit) == FALSE)
+                    if (inputs[i].Enteralimit(inputs[i].address, inputs[i].Limit_parameters) == FALSE)
                     {
                         printf("输入无效！\n");
                         continue;
@@ -849,14 +849,14 @@ BOOL matching(void* Front_pointer, void* rear_pointer, char* name)
                 // 根据字段类型进行比较
                 if (i >= 4) // 成绩字段（浮点数）
                 {
-                    float front = *(float*)list[i].Pointer_field;
-                    float rear = *(float*)list[i].pointer_field_two;
+                    float front = *(float*)list[i].Compare_pointers_A;
+                    float rear = *(float*)list[i].Compare_pointers_B;
                     return (front >= rear); // 降序排列
                 }
                 else if (i == 2) // 性别（字符串）
                 {
-                    const char* front_sex = (const char*)list[i].Pointer_field;
-                    const char* rear_sex = (const char*)list[i].pointer_field_two;
+                    const char* front_sex = (const char*)list[i].Compare_pointers_A;
+                    const char* rear_sex = (const char*)list[i].Compare_pointers_B;
                     return (strcmp(front_sex, rear_sex) >= 0); // 按字典序降序
                 }
                 else // 学号、年龄、证号（整数）
@@ -866,20 +866,20 @@ BOOL matching(void* Front_pointer, void* rear_pointer, char* name)
                     {
                         case 0: // 学号（uint32_t）
                         {
-                            uint32_t front = *(uint32_t*)list[i].Pointer_field;
-                            uint32_t rear = *(uint32_t*)list[i].pointer_field_two;
+                            uint32_t front = *(uint32_t*)list[i].Compare_pointers_A;
+                            uint32_t rear = *(uint32_t*)list[i].Compare_pointers_B;
                             return (front >= rear);
                         }
                         case 1: // 年龄（uint8_t）
                         {
-                            uint8_t front = *(uint8_t*)list[i].Pointer_field;
-                            uint8_t rear = *(uint8_t*)list[i].pointer_field_two;
+                            uint8_t front = *(uint8_t*)list[i].Compare_pointers_A;
+                            uint8_t rear = *(uint8_t*)list[i].Compare_pointers_B;
                             return (front >= rear);
                         }
                         case 3: // 证号（uint64_t）
                         {
-                            uint64_t front = *(uint64_t*)list[i].Pointer_field;
-                            uint64_t rear = *(uint64_t*)list[i].pointer_field_two;
+                            uint64_t front = *(uint64_t*)list[i].Compare_pointers_A;
+                            uint64_t rear = *(uint64_t*)list[i].Compare_pointers_B;
                             return (front >= rear);
                         }
                         default:

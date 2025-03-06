@@ -55,14 +55,14 @@ typedef struct input
     char* Promptwords;
     char* Placeholders;
     void* address;
-    void* limit;
+    void* Limit_parameters;
     BOOL(*Enteralimit)(const void*, const void*);
 }inputs;
 typedef struct str
 {
     const char* Placeholding;
-    const void* Pointer_field;
-    const void* pointer_field_two;
+    const void* Compare_pointers_A;
+    const void* Compare_pointers_B;
 }strlist;
 typedef struct compare
 {
@@ -384,7 +384,7 @@ void stuinput(students* input)                            /*输入*/
             {
                 if (inputs[i].Enteralimit != NULL)
                 {
-                    if (inputs[i].Enteralimit(inputs[i].address, inputs[i].limit) == FALSE)
+                    if (inputs[i].Enteralimit(inputs[i].address, inputs[i].Limit_parameters) == FALSE)
                     {
                         printf("输入无效！\n");
                         continue;
@@ -693,7 +693,7 @@ int64_t compare (const void* a, const void* b ,const char* c)
     {
         if (strcmp(list[i].Placeholding, c) == 0)
         {
-            return (*(int64_t*)list[i].Pointer_field - *(uint64_t*)list[i].pointer_field_two);
+            return (*(int64_t*)list[i].Compare_pointers_A - *(uint64_t*)list[i].Compare_pointers_B);
         }
     }
     printf("输入排序字符不合法！\n");

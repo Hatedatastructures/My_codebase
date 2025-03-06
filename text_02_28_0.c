@@ -18,7 +18,6 @@ void exchange(Heap_array* former,Heap_array* after)//参数：两个指针，指
     *after = temp;
 }
 void Adjust_downwards(Complete_binary_tree* tree, int parent)//参数：排序根节点，根节点在数组中的下标
-//向下调整算法
 {
     int child = 2*parent+1;//左孩子
     while( child < tree->size ) //防止越界
