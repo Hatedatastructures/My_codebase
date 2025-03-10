@@ -1127,7 +1127,7 @@ int main()
         {
             char file_name[file_name_scanf_s_str];
             printf("请输入文件名并且已经转义: ");
-            if(scanf_s("%s", file_name),(unsigned)file_name_scanf_s_str)
+            if(scanf_s("%s", file_name),file_name_scanf_s_str)
             {
                 while (getchar() != '\n');
                 SodeFile_read(&head, file_name);
