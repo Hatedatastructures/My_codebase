@@ -14,7 +14,7 @@ void shell_sort(int* arr ,int n)
     for(int gap = n / 2; gap > 0; gap =(gap/2))
     {
         // 从间隔位置开始遍历数组
-        for(int i = gap; i < n; i++)//从间隔开始小于数组长度
+        for(int i = gap; i < n; i=i+gap)//从间隔开始小于数组长度
         {
             // j用于记录当前元素的位置，tmp用于暂存当前元素的值
             int j = i;
@@ -51,7 +51,7 @@ void sell_sorts(int* arr ,int n)
                 j = j - gap;//假如还小就向下继续找
             }
             arr[j] = tmp; //上面的循环如果没进去就是因为arr[j-gap]<=tmp，所以直接把tmp放到j的位置
-            i++;
+            i = i+gap;
         }
     }
 }
