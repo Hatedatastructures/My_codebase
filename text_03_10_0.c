@@ -51,7 +51,7 @@ void sell_sorts(int* arr ,int n)
                 j = j - gap;//假如还小就向下继续找
             }
             arr[j] = tmp; //上面的循环如果没进去就是因为arr[j-gap]<=tmp，所以直接把tmp放到j的位置
-            i = i+gap;
+            i = i+gap;//跨过中间数，继续找下一个中间数
         }
     }
 }
